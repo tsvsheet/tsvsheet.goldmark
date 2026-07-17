@@ -4,7 +4,7 @@ import (
 	"html"
 	"strings"
 
-	tsvsheet "github.com/uplang/go-tsvsheet"
+	tsvsheet "github.com/tsvsheet/go-tsvsheet"
 )
 
 // sheetHTML parses and computes a .tsvt body and returns its HTML: a computed

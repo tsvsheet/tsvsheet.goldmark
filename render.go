@@ -8,7 +8,7 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/util"
 
-	"github.com/uplang/tsvsheet.goldmark/internal/constants"
+	"github.com/tsvsheet/tsvsheet.goldmark/internal/constants"
 )
 
 // sheetLang is the info-string language a fenced code block must declare to be

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/yuin/goldmark"
 
-	tsvgoldmark "github.com/uplang/tsvsheet.goldmark"
+	tsvgoldmark "github.com/tsvsheet/tsvsheet.goldmark"
 )
 
 // fence wraps a .tsvt body in a fenced code block with the given info string.
