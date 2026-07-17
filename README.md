@@ -1,0 +1,3 @@
+[![actions](https://github.com/uplang/tsvsheet.goldmark/actions/workflows/actions.yml/badge.svg)](https://github.com/uplang/tsvsheet.goldmark/actions/workflows/actions.yml) [![docs](https://github.com/uplang/tsvsheet.goldmark/actions/workflows/docs.yml/badge.svg)](https://github.com/uplang/tsvsheet.goldmark/actions/workflows/docs.yml) [![go](https://github.com/uplang/tsvsheet.goldmark/actions/workflows/go.yml/badge.svg)](https://github.com/uplang/tsvsheet.goldmark/actions/workflows/go.yml) [![release](https://github.com/uplang/tsvsheet.goldmark/actions/workflows/release.yml/badge.svg)](https://github.com/uplang/tsvsheet.goldmark/actions/workflows/release.yml)
+
+[docs](https://uplang.github.io/docs.tsvsheet.goldmark/)
