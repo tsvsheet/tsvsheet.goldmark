@@ -40,6 +40,26 @@ func TestConvert(t *testing.T) {
 			want: []string{`<table class="tsvsheet">`, "<tr>", "<td>1</td>", "<td>2</td>", "<td>3</td>", "</table>"},
 		},
 		{
+			name: "a declared header row renders as th",
+			ext:  tsvgoldmark.New(),
+			src:  fence("sheet", "#.header\trows(count(1))\nname\tqty\nwidget\t3"),
+			want: []string{"<th>name</th>", "<th>qty</th>", "<td>widget</td>"},
+		},
+		{
+			name:    "a hidden column is left out of the table",
+			ext:     tsvgoldmark.New(),
+			src:     fence("sheet", "#.hide\tcols(range(B:B))\nname\tscratch\nwidget\tx"),
+			want:    []string{"<td>name</td>", "<td>widget</td>"},
+			notWant: []string{"scratch", "<td>x</td>"},
+		},
+		{
+			name:    "a hidden row is left out of the table",
+			ext:     tsvgoldmark.New(),
+			src:     fence("sheet", "#.hide\trows(range(2:2))\nkeep\ndrop\nkeep too"),
+			want:    []string{"<td>keep</td>", "<td>keep too</td>"},
+			notWant: []string{"<td>drop</td>"},
+		},
+		{
 			name:    "non-sheet fence renders normally",
 			ext:     tsvgoldmark.New(),
 			src:     fence("go", "fmt.Println(1)"),

@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	github.com/gomatic/go-error v0.3.8
 	github.com/stretchr/testify v1.11.1
-	github.com/tsvsheet/go-tsvsheet v0.14.0
+	github.com/tsvsheet/go-tsvsheet v0.21.0
 	github.com/yuin/goldmark v1.8.4
 )
 
