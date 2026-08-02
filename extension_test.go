@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yuin/goldmark"
 
@@ -141,4 +142,64 @@ func TestWithClassEmpty(t *testing.T) {
 	got := convert(t, tsvgoldmark.New(tsvgoldmark.WithClass("")), fence("sheet", "1"))
 	require.Contains(t, got, `<table class="">`)
 	require.True(t, strings.Contains(got, "<td>1</td>"))
+}
+
+// TestErrRenderIsNotWhatAMalformedBlockProduces pins the difference between the
+// two ways rendering can go wrong. A broken .tsvt block is the author's
+// problem and belongs on the page as a visible pane; a write failure is the
+// caller's problem and belongs in the error return. Conflating them would
+// either fail a whole document over one bad fence, or swallow a genuine I/O
+// failure as if it were content.
+func TestErrRenderIsNotWhatAMalformedBlockProduces(t *testing.T) {
+	t.Parallel()
+	var buf bytes.Buffer
+	err := goldmark.New(goldmark.WithExtensions(tsvgoldmark.New())).
+		Convert([]byte(fence("sheet", "=1+")), &buf)
+
+	require.NoError(t, err, "a malformed block is content, not a conversion failure")
+	assert.NotErrorIs(t, err, tsvgoldmark.ErrRender)
+	assert.Contains(t, buf.String(), "<div", "it renders as a pane on the page")
+}
+
+// TestErrorHTMLMakesAMalformedBlockVisibleWithoutBreakingThePage pins both
+// halves: the failure is shown rather than silently dropped, and it is escaped
+// rather than injected — a parse error carrying markup from the source would
+// turn a typo into an XSS vector.
+func TestErrorHTMLMakesAMalformedBlockVisibleWithoutBreakingThePage(t *testing.T) {
+	t.Parallel()
+	out := convert(t, tsvgoldmark.New(), fence("sheet", "=<script>alert(1)</script>"))
+
+	assert.Contains(t, out, `<div class="tsvsheet-error">`, "the failure is never silent")
+	assert.NotContains(t, out, "<script", "and never breaks the page it lands on")
+	assert.Contains(t, out, "&lt;", "the offending text is escaped into the message")
+}
+
+// TestTableHTMLEscapesUntrustedCellText pins the escaping. Cell text comes from
+// a document, and a document is untrusted input; rendering it raw would make
+// every published sheet a way to inject markup into the page around it.
+func TestTableHTMLEscapesUntrustedCellText(t *testing.T) {
+	t.Parallel()
+	out := convert(t, tsvgoldmark.New(), fence("sheet", "<img src=x onerror=alert(1)>\tplain"))
+
+	assert.NotContains(t, out, "<img", "the cell's markup is text, not markup")
+	assert.Contains(t, out, "&lt;img")
+	assert.Contains(t, out, "plain")
+}
+
+// TestExtensionIsSafeToShareAcrossGoldmarkInstances pins the immutability the
+// doc claims. An extender that accumulated per-conversion state would work
+// perfectly until someone reused it, and then leak one document's content into
+// another's — the kind of bug that only appears under concurrency or in a
+// long-lived server.
+func TestExtensionIsSafeToShareAcrossGoldmarkInstances(t *testing.T) {
+	t.Parallel()
+	shared := tsvgoldmark.New()
+
+	first := convert(t, shared, fence("sheet", "1\t2"))
+	second := convert(t, shared, fence("sheet", "3\t4"))
+	again := convert(t, shared, fence("sheet", "1\t2"))
+
+	assert.Equal(t, first, again, "the same input renders the same however often the extender is reused")
+	assert.NotEqual(t, first, second)
+	assert.NotContains(t, second, ">1<", "and no document leaks into the next")
 }
