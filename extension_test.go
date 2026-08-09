@@ -203,3 +203,15 @@ func TestExtensionIsSafeToShareAcrossGoldmarkInstances(t *testing.T) {
 	assert.NotEqual(t, first, second)
 	assert.NotContains(t, second, ">1<", "and no document leaks into the next")
 }
+
+// TestExtensionRendersNamedValues pins the 023 seam in the fence host: a
+// sheet block declaring names with the |@ meta clause renders its computed
+// values into the table, so documents embedding named sheets cannot silently
+// lag the engine's grammar.
+func TestExtensionRendersNamedValues(t *testing.T) {
+	t.Parallel()
+
+	html := convert(t, tsvgoldmark.New(), fence("sheet", "=0.08 |@ named(Rate)\t=@Rate * 100"))
+	assert.Contains(t, html, ">0.08<")
+	assert.Contains(t, html, ">8<")
+}
